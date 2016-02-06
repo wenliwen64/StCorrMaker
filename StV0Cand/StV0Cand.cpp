@@ -2,7 +2,7 @@
 #include "TMap.h"
 #include "TVector2.h"
 #include "utilities.h" // include constants
-StV0Cand::StV0Cand(const TMap& leavesMap, const int& candno){
+StV0Cand::StV0Cand(const TMap& leavesMap, const int& candno, const StV0Cuts& cuts){
     m_dau1Id = m_leavesMap.FindObject("dau1Id")->GetValue(m_candno);
     m_dau2Id = m_leavesMap.FindObject("dau2Id")->GetValue(m_candno);
     m_pt = m_leavesMap.FindObject("pt")->GetValue(m_candno);
@@ -19,10 +19,12 @@ StV0Cand::StV0Cand(const TMap& leavesMap, const int& candno){
     m_track1_nsigma = m_leavesMap.FindObjet("track1nsigma")->GetValue(m_candno);
     m_track2_nsigma = m_leavesMap.FindObjet("track2nsigma")->GetValue(m_candno);
     m_en = computeEnergy(m_pt, m_eta);
+
+    m_status = passCuts(cuts)? true:false;
 }
 
 bool StV0Cand::passCuts(const StV0Cuts& cuts){
-    if(dau1Id() != dau2Id() && cuts.mass(mass())
+    return (dau1Id() != dau2Id() && cuts.mass(mass())
                             && cuts.dcaGlobal(dcaGlobal()) 
 			    && cuts.pt(pt())
 			    && cuts.eta(eta())
@@ -32,13 +34,7 @@ bool StV0Cand::passCuts(const StV0Cuts& cuts){
 			    && cuts.dau1Dca(dau1Dca())
 			    && cuts.dau2Dca(dau2Dca())
 			    && cuts.dca1to2(dca1to2())
-			    && cuts.lowPtDca(dau1Dca(), dau2Dca()))
-	m_status = true; 
-    else
-        m_status = false;
- 
-    return m_status;
- 
+			    && cuts.lowPtDca(dau1Dca(), dau2Dca()))? true:false;
 }
 //======Private=====
 Double_t StV0Cand::computePhi(Double_t px, Double_t py){
